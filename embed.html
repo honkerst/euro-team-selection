@@ -1,0 +1,1528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soccer Team Selection Widget</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" />
+<script defer src="https://cloud.umami.is/script.js" data-website-id="c232d86e-81cb-4161-8435-855eefc314df"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js" integrity="sha512-01CJ9/g7e8cUmY0DFTMcUw/ikS799FHiOA0eyHsUWfOetgbx/t6oV4otQ5zXKQyIrQGTHSmRVPIgrgLcZi/WMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<style>
+  /* @import url('https://fonts.cdnfonts.com/css/daxlinepro'); */
+  /* @import doesn't work with dom-to-image, https://github.com/tsayen/dom-to-image/issues/59#issuecomment-249211834   */
+  @font-face { 
+      font-family: daxlinepro;
+      font-style: normal;
+      font-weight: 400;
+      src: local('DaxlinePro'), url('https://fonts.cdnfonts.com/s/58174/DaxlinePro-Regular.woff') format('woff')
+  }
+  @font-face { 
+      font-family: daxlinepro;
+      font-style: normal;
+      font-weight: 300;
+      src: local('DaxlinePro'), url('https://fonts.cdnfonts.com/s/58174/DaxlinePro-Light.woff') format('woff')
+  }
+  @font-face { 
+      font-family: daxlinepro;
+      font-style: normal;
+      font-weight: 500;
+      src: local('DaxlinePro'), url('https://fonts.cdnfonts.com/s/58174/DaxlinePro-Medium.woff') format('woff')
+  }
+  @font-face { 
+      font-family: daxlinepro;
+      font-style: normal;
+      font-weight: 700;
+      src: local('DaxlinePro'), url('https://fonts.cdnfonts.com/s/58174/DaxlinePro-Bold.woff') format('woff')
+  }
+  @font-face { 
+      font-family: daxlinepro;
+      font-style: normal;
+      font-weight: 900;
+      src: local('DaxlinePro'), url('https://fonts.cdnfonts.com/s/58174/DaxlinePro-ExtraBold.woff') format('woff')
+  }
+  
+  /* preload images */
+  body::after {
+    position:absolute; width:0; height:0; overflow:hidden; z-index:-1; 
+    content:url(img/pitch_lines.png) url(img/grass-full.jpg) url(img/grass.jpg) url(img/player_blank.png); 
+  }
+  body,
+  #oathContainer {
+    background: #f2f2f2;
+  }
+  #oathContainer,
+  .fancybox-container {
+    font-family: 'DaxlinePro', sans-serif;
+  }
+  #oathContainer h1 {
+    font-size: 24px;
+    line-height: 28px;
+    margin: 15px 0px;
+  }
+  #oathContainer p {
+    font-size: 14px;
+    line-height: 20px;
+    margin: 10px 0px;
+  }
+  #endscreen p {
+    margin: 7px 0px;
+    font-size: 13px;
+    line-height: 17px;
+  }
+  #endscreen p.terms {
+    font-size: 9px;
+    line-height: 12px;
+    color: #999999;
+  }
+  /* pitch and player icons */
+  #quizHolder {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    /* max-height: 715px; */
+    padding: 0px;
+    background: linear-gradient(to bottom, rgba(47, 92, 7, 0.5), rgba(100, 145, 20, 0.5), rgba(156, 196, 37, 0.5)), url(img/grass-full.jpg);
+    background-size: cover;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  #quizHolder.framed {
+
+  }
+  #startscreen {
+    position: relative;
+    width: calc(100% - 80px);
+    padding: 40px;
+    aspect-ratio: 1 / 1.276978417266187;
+    max-width: 480px;
+    max-height: 275px;
+    margin-left: auto;
+    margin-right: auto;
+    align-items: center;
+    background-image: url(img/header.jpg);
+    background-size: contain;
+    background-color: white;
+    background-repeat: no-repeat;
+    background-position: top center;
+    padding-top: 390px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+  }
+  #pitchscreen {
+    display: none;
+  }
+  #pitch {
+    position: relative;
+    width: 100%;
+    /* aspect-ratio: 1/1.276978417266187; */
+    aspect-ratio: 1.101846670397314;
+    max-width: 560px;
+    /* max-height: 617px; */
+    margin-left: auto;
+    margin-right: auto;
+    background-image: url(img/pitch_lines.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    display: none;
+  }
+  #pitchscreen .framed {
+    /* min-height: 500px; */
+    width: 70%;
+  }
+  #oathContainer #pitchscreen h2 {
+    margin: 0;
+    padding: 30px;
+    color: #fff;
+    font-family: 'DaxlinePro', sans-serif;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 30px;
+    font-weight: 900;
+    width: calc(100% - 60px);
+  }
+  #oathContainer #quizHolder.framed #pitchscreen h2 {
+    font-size: 22px;
+    width: calc(70% - 60px);
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px 30px 10px 30px;
+  }
+  #oathContainer .buttons {
+    position: relative;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #oathContainer button {
+    display: flex;
+    min-width: 170px;
+    width: auto;
+    height: 40px;
+    padding: 8px 24px 6px 24px;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    border: 0px;
+    border-radius: 100px;
+    background: #FFF;
+    font-family: 'DaxlinePro', sans-serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 0 10px 0 10px;
+    cursor: pointer;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.20);
+    margin: 5px;
+  }
+  #oathContainer .buttonband {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #oathContainer .buttonband button {
+    box-shadow: none;
+    border: 1px solid #012406;
+  }
+  #oathContainer .buttons.framed {
+    background: #ffffff;
+    color: #012406;
+    padding: 20px 0 10px 0;
+    margin-top: -30px;
+  }
+  #oathContainer button.dark {
+    background: #012406;
+    color: #ffffff;
+  }
+  #oathContainer .buttons button.disabled {
+    background: #01240673;
+    color: #a3e61e85;
+    cursor: default;
+    pointer-events: none;
+  }
+  #oathContainer .buttons button.hidden {
+    display: none;
+  }
+  #oathContainer .buttons button.enabled:hover {
+    background: #f2f2f2;
+    cursor: pointer;
+  }
+  #oathContainer button.enabled.dark:hover {
+    background: #012406d4;
+    cursor: pointer;
+  }
+  #oathContainer #endscreen {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #ffffff;
+    color: #012406;
+    padding: 0 30px;
+    text-align: center;
+    z-index: 10;
+    position: relative;
+  }
+  #player-list {
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+  }
+  #player-list figure {
+    margin: 0;
+    padding: 1rem 0 0 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #player-list figure:nth-child(1) {
+    order: 4;
+  }
+  #player-list figure:nth-child(2) {
+    order: 1;
+  }
+  #player-list figure:nth-child(3) {
+    order: 2;
+  }
+  #player-list figure:nth-child(4) {
+    order: 3;
+  }
+  #player-list ul {
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  #player-list ul li {
+    background-repeat: no-repeat;
+    background-size: 50px 50px;
+    background-position: 10px center;
+    padding-left: 75px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-family: 'DaxlinePro', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  .player-icon {
+    position: absolute;
+    display: flex;
+    width: 90px;
+    height: 90px;
+    margin-top: -20px;
+    margin-left: -45px;
+    background-image: url(img/player_blank.png);
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-size: 40px 40px;
+    background-position: center top;
+    cursor: pointer;
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none;/* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  }
+  .player-icon > span {
+    display: flex;
+    font-size: 12px;
+    color: #fff;
+    background-color: #222;
+    font-family: 'DaxlinePro', sans-serif;
+    border-radius: 15px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px 0 10px;
+    height: 18px;
+    margin-top: 45px;
+    margin-left: auto;
+    margin-right: auto;
+
+  }
+  #pitch.framed .player-icon {
+    width: 60px;
+    height: 60px;
+    margin-top: -10px;
+    margin-left: -30px;
+  }
+  #pitch.framed .player-icon > span {
+    margin-top: 42px;
+    font-size: 9px;
+  }
+  #player-list .disabled {
+    color: #ccc;
+    pointer-events: none;
+  }
+  .hidden {
+      display: none!important;
+  }
+  .visible {
+      display: block!important;
+  }
+
+
+  #formation-list {
+    max-width: 500px;
+  }
+  #formation-list h2 {
+    text-align: center;
+  }
+  #formation-list ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+  }
+  #formation-list ul li {
+    /* width: 120px; */
+    height: 220px;
+    margin: 20px 10px 10px 10px;
+    list-style: none;
+    background-size: 100px 129px;
+    background-repeat: no-repeat;
+    background-position: center 20px;
+    font-family: 'DaxlinePro', sans-serif;
+    text-align: center;
+    font-weight: 700;
+    flex: 1 1 calc(33% - 20px);
+    border: 1px solid #e9e9e9;
+    border-radius: 5px;
+    padding: 175px 20px 10px 20px;
+  }
+  #formation-list ul li:hover {
+    border: 1px solid #e9e9e9;
+    background-color: #e9e9e9;
+    cursor: pointer;
+  }
+  ::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, .5);
+    box-shadow: 0 0 1px rgba(255, 255, 255, .5);
+  }
+  /* lightbox pointers */
+  .fancybox-content {
+    border-radius: 15px;
+    overflow: scroll;
+    max-height: 550px;
+        scrollbar-color: #333333ab #fff;
+  }
+  .fancybox-container #player-list {
+      cursor: default;
+      border-radius: 10px;
+      max-height: 550px;
+  }
+  .fancybox-container #player-list > figure > ul > li {
+    cursor: pointer !important;
+    width: 150px;
+    height: 70px;
+    border: 1px solid #999;
+    border-radius: 5px;
+    margin: 4px 4px 4px 4px;
+    flex: 1 1 calc(50% - 8px);
+    text-align: left;
+    max-width: calc(50% - 8px);
+    -webkit-touch-callout: none; /* iOS Safari */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+          -ms-user-select: none; /* Internet Explorer/Edge */
+              user-select: none;/* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  }
+  .fancybox-container #player-list > figure > ul > li.disabled {
+    cursor: not-allowed!important;
+    background-blend-mode: luminosity;
+    background-color: #fff;
+  }
+  @media only screen and (max-width: 420px) {
+      #startscreen {
+        width: calc(100% - 40px);
+        padding: 250px 20px 20px 20px;
+      }
+      #startscreen h1 {
+        font-size: 24px;
+      }
+      #startscreen p {
+        margin: 10px 0px;
+      }
+      /* #pitch {
+        min-height: unset;
+      } */
+      #oathContainer #pitchscreen h2 {
+        padding: 20px;
+        font-size: 18px;
+      }
+      #oathContainer #pitchscreen .buttons button {
+        width: 150px;
+        height: 30px;
+        padding: 6px 18px 4px 18px;
+        margin: 0 5px 0 5px;
+        font-size: 11px;
+      }
+      #oathContainer #quizHolder.framed #pitchscreen h2 {
+          font-size: 16px;
+          width: calc(70% - 20px);
+          padding: 20px 10px 10px 10px;
+      }
+      #oathContainer .buttons {
+        flex-direction: column;
+      }
+      #oathContainer button {
+      }
+      #oathContainer .buttonband {
+        flex-direction: column;
+      }
+      .player-icon {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        margin-top: -10px;
+        margin-left: -30px;
+        background-size: 32px 32px;
+      }
+      .player-icon > span {
+        font-size: 8px;
+        margin-top: 35px;
+        height: 14px;
+        padding: 0 6px 0 6px;
+      }
+      #pitchscreen .framed {
+        width: 80%;
+      }
+      #pitch.framed .player-icon {
+        width: 48px;
+        height: 48px;
+        margin-top: -10px;
+        margin-left: -24px;
+      }
+      #pitch.framed .player-icon > span {
+        margin-top: 28px;
+      }
+      .fancybox-content {
+        padding: 42px 24px 30px 30px;
+      }
+      #formation-list ul li {
+        height: 170px;
+        margin: 20px 10px 10px 10px;
+        background-size: 70px 90px;
+        padding: 130px 0px 10px 0px;
+      }
+      .fancybox-container #player-list > figure > ul > li {
+        height: 50px;
+        background-size: 36px 36px;
+        min-width: 100%;
+      }
+  }
+</style>
+
+</head>
+<body>
+
+<div id="oathContainer">
+      
+    <div id="quizHolder">
+      <div id="startscreen">
+        <h1>Pick your all-time European Championships starting XI  </h1>
+        <p>With the Euros just around the corner, we’re challenging you to pick your all-time European Championship dream team.</p>
+        <p>To get involved, simply pick your players and choose your formation, then share your perfect line-up with your pals.</p>
+        <p>As soon as you're done, you'll earn a FREE sports bet!</p>
+        <button id="start-btn" class="dark enabled">Build your team</button>
+      </div>
+      <div id="pitchscreen">
+        <h2 id="teamTitle">Pick your all-time European Championships starting XI</h2>
+        <h2 id="downloadTitle" class="hidden enabled">My all-time European Championships starting XI</h2>
+        <h2 id="sentTitle" class="hidden enabled">You've been sent this all-time European Championships starting XI!</h2>
+        <div id="pitch">
+          <div class="player-icon" id="number1" data-player="unassigned1" data-playertype="1" style="left: 50%; top: 11%;"></div>
+
+          <div class="player-icon" id="number2" data-player="unassigned2" data-playertype="2" style="left: 26%; top: 30%;"></div>
+          <div class="player-icon" id="number3" data-player="unassigned3" data-playertype="2" style="left: 42%; top: 30%;"></div>
+          <div class="player-icon" id="number4" data-player="unassigned4" data-playertype="2" style="left: 58%; top: 30%;"></div>
+          <div class="player-icon" id="number5" data-player="unassigned5" data-playertype="2" style="left: 74%; top: 30%;"></div>
+
+          <div class="player-icon" id="number6" data-player="unassigned6" data-playertype="3" style="left: 26%; top: 50%;"></div>
+          <div class="player-icon" id="number7" data-player="unassigned7" data-playertype="3" style="left: 42%; top: 50%;"></div>
+          <div class="player-icon" id="number8" data-player="unassigned8" data-playertype="3" style="left: 58%; top: 50%;"></div>
+          <div class="player-icon" id="number9" data-player="unassigned9" data-playertype="3" style="left: 74%; top: 50%;"></div>
+
+          <div class="player-icon" id="number10" data-player="unassigned10" data-playertype="4" style="left: 40%; top: 70%;"></div>
+          <div class="player-icon" id="number11" data-player="unassigned11" data-playertype="4" style="left: 60%; top: 70%;"></div>
+
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button id="edit-formation-btn" class="enabled">Edit Formation</button>
+        <button id="tryyourself-btn" class="enabled hidden">Try it yourself!</button>
+        <button id="complete-btn" class="disabled">Confirm team</button>
+        <button id="download-btn" class="dark enabled hidden">Save Team</button>
+      </div>
+
+      <div id="endscreen">
+        <p>Excellent job! As a special reward, we now have a <strong>FREE BET</strong> for you to claim.</p>
+        <p>Simply click the link below to sign-up and grab your freebie.</p>
+        <p>Remember, there are so many reasons to place your sports bets at Lottoland, including price boosts, early cashouts, awesome odds and our incredible bet builder.</p>
+        <p>Why not try your luck today?</p>
+        <div class="buttonband">
+          <button id="register-btn" class="enabled">Register & Claim</button>
+          <button id="share-facebook-btn" class="hidden enabled">Share to Facebook</button>
+          <button id="copy-btn" class="enabled hidden">Copy link</button>
+        </div>
+        <p class="terms">18+. New customers only. Claim a free £10 bet when you sign-up, deposit & wager £10 on sports. Minimum odds on qualifying bet 1/1 (2.0). Unused free bets expire after 7 days. Max win from free bet capped at £100. BeGambleAware.org T&Cs apply.</p>
+      </div>
+
+    </div>
+
+  <div style="display: none;">
+    <div id="player-list-holder">
+      <div id="player-list">
+        <figure>
+          <figcaption>Goalkeepers</figcaption>
+          <ul>
+            <li data-player="Banks" data-icon="country_england.png">Gordon Banks</li>
+            <li data-player="Barthez" data-icon="country_france.png">Fabian Barthez</li>
+            <li data-player="Buffon" data-icon="country_italy.png">Gianluigi Buffon</li>
+            <li data-player="Casillas" data-icon="country_spain.png">Iker Casillas</li>
+            <li data-player="Cech" data-icon="country_czech.png">Petr Cech</li>
+            <li data-player="Courtois" data-icon="country_belgium.png">Thibaut Courtois</li>
+            <!-- <li data-player="Jennings" data-icon="country_northernireland.png">Pat Jennings</li> -->
+            <li data-player="Kahn" data-icon="country_germany.png">Oliver Kahn</li>
+            <li data-player="Lloris" data-icon="country_france.png">Hugo Lloris</li>
+            <li data-player="Maier" data-icon="country_germany.png">Sepp Maier</li>
+            <li data-player="Neuer" data-icon="country_germany.png">Manuel Neuer</li>
+            <li data-player="Peruzzi" data-icon="country_italy.png">Angelo Peruzzi</li>
+            <li data-player="Preud'homme" data-icon="country_belgium.png">Michel Preud'homme</li>
+            <li data-player="Schmeichel" data-icon="country_denmark.png">Peter Schmeichel</li>
+            <li data-player="Seaman" data-icon="country_england.png">David Seaman</li>
+            <li data-player="Shilton" data-icon="country_england.png">Peter Shilton</li>
+            <li data-player="Tomaszewski" data-icon="country_poland.png">Jan Tomaszewski</li>
+            <li data-player="Van Breukelen" data-icon="country_netherlands.png">Hans Van Breukelen</li>
+            <li data-player="Van Der Sar" data-icon="country_netherlands.png">Edwin Van Der Sar</li>
+            <li data-player="Yashin" data-icon="country_ussr.png">Lev Yashin</li>
+            <li data-player="Zoff" data-icon="country_italy.png">Dino Zoff</li>
+            <li data-player="Zenga" data-icon="country_italy.png">Walter Zenga</li>
+            <li data-player="Zubizarreta" data-icon="country_spain.png">Andoni Zubizarreta</li>
+          </ul>
+        </figure>
+        <figure>
+          <figcaption>Defenders</figcaption>
+          <ul>
+            <li data-player="Adams" data-icon="country_england.png">Tony Adams</li>
+            <li data-player="Baresi" data-icon="country_italy.png">Franco Baresi</li>
+            <li data-player="Beckenbauer" data-icon="country_germany.png">Franz Beckenbauer</li>
+            <li data-player="Cannavaro" data-icon="country_italy.png">Fabio Cannavaro</li>
+            <li data-player="Carvalho" data-icon="country_portugal.png">Ricardo Carvalho</li>
+            <li data-player="Chiellini" data-icon="country_italy.png">Giorgio Chiellini</li>
+            <li data-player="Cole" data-icon="country_england.png">Ashley Cole</li>
+            <li data-player="Desailly" data-icon="country_france.png">Marcel Desailly</li>
+            <li data-player="Evra" data-icon="country_france.png">Patrice Evra</li>
+            <li data-player="Facchetti" data-icon="country_italy.png">Giacinto Facchetti</li>
+            <li data-player="Ferdinand" data-icon="country_england.png">Rio Ferdinand</li>
+            <!-- <li data-player="Irwin" data-icon="country_ireland.png">Denis Irwin</li> -->
+            <!-- <li data-player="Johnstone" data-icon="country_scotland.png">Jimmy Johnstone</li> -->
+            <li data-player="Koeman" data-icon="country_netherlands.png">Ronald Koeman</li>
+            <li data-player="Kompany" data-icon="country_belgium.png">Vincent Kompany</li>
+            <li data-player="Lahm" data-icon="country_germany.png">Philipp Lahm</li>
+            <li data-player="Maldini" data-icon="country_italy.png">Paolo Maldini</li>
+            <li data-player="Matthaus" data-icon="country_germany.png">Lothar Matthaus</li>
+            <li data-player="Moore" data-icon="country_england.png">Bobby Moore</li>
+            <li data-player="Nesta" data-icon="country_italy.png">Alessandro Nesta</li>
+            <li data-player="Neville" data-icon="country_england.png">Gary Neville</li>
+            <li data-player="Puyol" data-icon="country_spain.png">Carles Puyol</li>
+            <li data-player="Ramos" data-icon="country_spain.png">Sergio Ramos</li>
+            <li data-player="Scirea" data-icon="country_italy.png">Gaetano Scirea</li>
+            <li data-player="Silva" data-icon="country_france.png">Thiago Silva</li>
+            <li data-player="Stam" data-icon="country_netherlands.png">Jaap Stam</li>
+            <li data-player="Terry" data-icon="country_england.png">John Terry</li>
+            <li data-player="Thuram" data-icon="country_france.png">Lilian Thuram</li>
+            <li data-player="van Dijk" data-icon="country_netherlands.png">Virgil van Dijk</li>
+            <!-- <li data-player="Vidic" data-icon="country_serbia.png">Nemanja Vidic</li> -->
+            <li data-player="Vogts" data-icon="country_germany.png">Berti Vogts</li>
+          </ul>
+        </figure>
+        <figure>
+          <figcaption>Midfielders</figcaption>
+          <ul>
+            <li data-player="Alonso" data-icon="country_spain.png">Xabi Alonso</li>
+            <li data-player="Beckham" data-icon="country_england.png">David Beckham</li>
+            <li data-player="Busquets" data-icon="country_spain.png">Sergio Busquets</li>
+            <li data-player="Cruyff" data-icon="country_netherlands.png">Johan Cruyff</li>
+            <li data-player="De Bruyne" data-icon="country_belgium.png">Kevin De Bruyne</li>
+            <li data-player="Fabregas" data-icon="country_spain.png">Cesc Fabregas</li>
+            <li data-player="Gascoigne" data-icon="country_england.png">Paul Gascoigne</li>
+            <li data-player="Gerrard" data-icon="country_england.png">Steven Gerrard</li>
+            <li data-player="Gullit" data-icon="country_netherlands.png">Ruud Gullit</li>
+            <li data-player="Hagi" data-icon="country_romania.png">Gheorghe Hagi</li>
+            <li data-player="Iniesta" data-icon="country_spain.png">Andres Iniesta</li>
+            <li data-player="Kante" data-icon="country_france.png">N'Golo Kante</li>
+            <!-- <li data-player="Keane" data-icon="country_ireland.png">Roy Keane</li> -->
+            <li data-player="Kroos" data-icon="country_germany.png">Toni Kroos</li>
+            <li data-player="Lampard" data-icon="country_england.png">Frank Lampard</li>
+            <li data-player="Laudrup" data-icon="country_denmark.png">Michael Laudrup</li>
+            <li data-player="Makelele" data-icon="country_france.png">Claude Makelele</li>
+            <li data-player="Matthaus" data-icon="country_germany.png">Lothar Matthaus</li>
+            <!-- <li data-player="McNeill" data-icon="country_scotland.png">Billy McNeill</li> -->
+            <li data-player="Modric" data-icon="country_croatia.png">Luka Modric</li>
+            <li data-player="Muller" data-icon="country_germany.png">Thomas Muller</li>
+            <li data-player="Neeskens" data-icon="country_netherlands.png">Johan Neeskens</li>
+            <li data-player="Panenka" data-icon="country_czech.png">Antonín Panenka</li>
+            <li data-player="Pirlo" data-icon="country_italy.png">Andrea Pirlo</li>
+            <li data-player="Platini" data-icon="country_france.png">Michel Platini</li>
+            <li data-player="Pogba" data-icon="country_france.png">Paul Pogba</li>
+            <li data-player="Rijkaard" data-icon="country_netherlands.png">Frank Rijkaard</li>
+            <li data-player="Scholes" data-icon="country_england.png">Paul Scholes</li>
+            <li data-player="Schuster" data-icon="country_germany.png">Bernd Schuster</li>
+            <li data-player="Seedorf" data-icon="country_netherlands.png">Clarence Seedorf</li>
+            <li data-player="Shaqiri" data-icon="country_switzerland.png">Xherdan Shaqiri</li>
+            <!-- <li data-player="Souness" data-icon="country_scotland.png">Graeme Souness</li> -->
+            <li data-player="Tardelli" data-icon="country_italy.png">Marco Tardelli</li>
+            <li data-player="Tugay" data-icon="country_turkey.png">Tugay Kerimoğlu</li>
+            <li data-player="Turan" data-icon="country_turkey.png">Arda Turan</li>
+            <li data-player="Vieira" data-icon="country_france.png">Patrick Vieira</li>
+            <li data-player="Xavi" data-icon="country_spain.png">Xavi Hernández</li>
+            <li data-player="Xhaka" data-icon="country_switzerland.png">Granit Xhaka</li>
+            <li data-player="Zidane" data-icon="country_france.png">Zinedine Zidane</li>
+          </ul>
+        </figure>
+        <figure>
+          <figcaption>Forwards</figcaption>
+          <ul>
+            <li data-player="Baggio" data-icon="country_italy.png">Roberto Baggio</li>
+            <li data-player="Bale" data-icon="country_wales.png">Gareth Bale</li>
+            <li data-player="Benzema" data-icon="country_france.png">Karim Benzema</li>
+            <li data-player="Bergkamp" data-icon="country_netherlands.png">Dennis Bergkamp</li>
+            <!-- <li data-player="Best" data-icon="country_northernireland.png">George Best</li> -->
+            <li data-player="Cantona" data-icon="country_france.png">Eric Cantona</li>
+            <li data-player="Charlton" data-icon="country_england.png">Bobby Charlton</li>
+            <li data-player="Chapuisat" data-icon="country_switzerland.png">Stephane Chapuisat</li>
+            <!-- <li data-player="Dalglish" data-icon="country_scotland.png">Kenny Dalglish</li> -->
+            <li data-player="Del Piero" data-icon="country_italy.png">Alessandro Del Piero</li>
+            <li data-player="Di Stéfano" data-icon="country_spain.png">Alfredo Di Stéfano</li>
+            <li data-player="Eusébio" data-icon="country_portugal.png">Eusébio</li>
+            <li data-player="Figo" data-icon="country_portugal.png">Luís Figo</li>
+            <!-- <li data-player="Giggs" data-icon="country_wales.png">Ryan Giggs</li> -->
+            <li data-player="Greaves" data-icon="country_england.png">Jimmy Greaves</li>
+            <!-- <li data-player="Haaland" data-icon="country_norway.png">Erling Haaland</li> -->
+            <li data-player="Hazard" data-icon="country_belgium.png">Eden Hazard</li>
+            <li data-player="Henry" data-icon="country_france.png">Thierry Henry</li>
+            <li data-player="Ibrahimovic" data-icon="country_sweden.png">Zlatan Ibrahimovic</li>
+            <li data-player="Kane" data-icon="country_england.png">Harry Kane</li>
+            <li data-player="Keegan" data-icon="country_england.png">Kevin Keegan</li>
+            <li data-player="Larsen" data-icon="country_sweden.png">Henrik Larsen</li>
+            <!-- <li data-player="Law" data-icon="country_scotland.png">Denis Law</li> -->
+            <li data-player="Lineker" data-icon="country_england.png">Gary Lineker</li>
+            <li data-player="Lewandowski" data-icon="country_poland.png">Robert Lewandowski</li>
+            <li data-player="Mbappe" data-icon="country_france.png">Kylian Mbappe</li>
+            <li data-player="Muller" data-icon="country_germany.png">Gerd Muller</li>
+            <li data-player="Mutu" data-icon="country_romania.png">Adrian Mutu</li>
+            <li data-player="Simonsen" data-icon="country_denmark.png">Allan Simonsen</li>
+            <li data-player="Suker" data-icon="country_croatia.png">Davor Suker</li>
+            <li data-player="Stoichkov" data-icon="country_bulgaria.png">Hristo Stoichkov</li>
+            <li data-player="Totti" data-icon="country_italy.png">Francesco Totti</li>
+            <!-- <li data-player="Puskas" data-icon="country_hungary.png">Ferenc Puskas</li> -->
+            <li data-player="Raul" data-icon="country_spain.png">Raul Gonzalez</li>
+            <li data-player="Ribery" data-icon="country_france.png">Franck Ribery</li>
+            <li data-player="Robben" data-icon="country_netherlands.png">Arjen Robben</li>
+            <li data-player="Ronaldo" data-icon="country_portugal.png">Cristiano Ronaldo</li>
+            <li data-player="Rooney" data-icon="country_england.png">Wayne Rooney</li>
+            <li data-player="Rossi" data-icon="country_italy.png">Paolo Rossi</li>
+            <li data-player="Rummenigge" data-icon="country_germany.png">Karl-Heinz Rummenigge</li>
+            <!-- <li data-player="Rush" data-icon="country_wales.png">Ian Rush</li> -->
+            <li data-player="Shearer" data-icon="country_england.png">Alan Shearer</li>
+            <li data-player="Shevchenko" data-icon="country_ukraine.png">Andriy Shevchenko</li>
+            <li data-player="Sukur" data-icon="country_turkey.png">Hakan Sukur</li>
+            <li data-player="Torres" data-icon="country_spain.png">Fernando Torres</li>
+            <li data-player="van Basten" data-icon="country_netherlands.png">Marco van Basten</li>
+            <li data-player="Villa" data-icon="country_spain.png">David Villa</li>
+            
+          </ul>
+        </figure>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: none;">
+    <div id="formation-list">
+      <h2>Choose a formation</h2>
+      <ul>
+        <li data-formation="4-3-3">4-3-3</li>
+        <li data-formation="4-2-3-1">4-2-3-1</li>
+        <li data-formation="4-4-2">4-4-2</li>
+        <li data-formation="5-3-2">5-3-2</li>
+        <li data-formation="4-1-2-1-2">4-1-2-1-2</li>
+        <li data-formation="4-5-1">4-5-1</li>
+        <li data-formation="4-1-4-1">4-1-4-1</li>
+        <li data-formation="3-4-3">3-4-3</li>
+        <li data-formation="4-2-2-2">4-2-2-2</li>
+        <li data-formation="4-4-1-1">4-4-1-1</li>
+        <li data-formation="3-5-2">3-5-2</li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js"></script>
+
+
+  <script>
+    
+  var positions = {
+      '4-3-3': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '30%' },
+          { left: '42%', top: '30%' },
+          { left: '58%', top: '30%' },
+          { left: '74%', top: '30%' },
+
+          { left: '34%', top: '50%' },
+          { left: '50%', top: '50%' },
+          { left: '66%', top: '50%' },
+
+          { left: '34%', top: '70%' },
+          { left: '50%', top: '70%' },
+          { left: '66%', top: '70%' },
+
+      ],
+      '4-2-3-1': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '26%' },
+          { left: '42%', top: '26%' },
+          { left: '58%', top: '26%' },
+          { left: '74%', top: '26%' },
+
+          { left: '40%', top: '41%' },
+          { left: '60%', top: '41%' },
+
+          { left: '30%', top: '56%' },
+          { left: '70%', top: '56%' },
+          { left: '50%', top: '56%' }, // striker
+
+          { left: '50%', top: '72%' }
+      ],
+      '4-4-2': [
+
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '30%' },
+          { left: '42%', top: '30%' },
+          { left: '58%', top: '30%' },
+          { left: '74%', top: '30%' },
+
+          { left: '26%', top: '50%' },
+          { left: '42%', top: '50%' },
+          { left: '58%', top: '50%' },
+          { left: '74%', top: '50%' },
+
+          { left: '40%', top: '70%' },
+          { left: '60%', top: '70%' },
+
+      ],
+      '5-3-2': [
+          { left: '50%', top: '11%' },
+
+          { left: '24%', top: '30%' },
+          { left: '37%', top: '30%' },
+          { left: '50%', top: '30%' },
+          { left: '63%', top: '30%' },
+          { left: '76%', top: '30%' },
+
+          { left: '34%', top: '50%' },
+          { left: '50%', top: '50%' },
+          { left: '66%', top: '50%' },
+
+          { left: '40%', top: '70%' },
+          { left: '60%', top: '70%' },
+      ],
+      '4-1-2-1-2': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '26%' },
+          { left: '42%', top: '26%' },
+          { left: '58%', top: '26%' },
+          { left: '74%', top: '26%' },
+
+          { left: '50%', top: '40%' },
+
+          { left: '40%', top: '51%' },
+          { left: '60%', top: '51%' },
+
+          { left: '50%', top: '62%' },
+
+          { left: '40%', top: '75%' },
+          { left: '60%', top: '75%' }
+
+      ],
+      '4-5-1': [
+
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '30%' },
+          { left: '42%', top: '30%' },
+          { left: '58%', top: '30%' },
+          { left: '74%', top: '30%' },
+
+          { left: '22%', top: '50%' },
+          { left: '36%', top: '50%' },
+          { left: '50%', top: '50%' },
+          { left: '64%', top: '50%' },
+          { left: '78%', top: '50%' },
+
+          { left: '50%', top: '70%' },
+      ],
+      '4-1-4-1': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '26%' },
+          { left: '42%', top: '26%' },
+          { left: '58%', top: '26%' },
+          { left: '74%', top: '26%' },
+
+          { left: '50%', top: '41%' },
+
+          { left: '26%', top: '56%' },
+          { left: '74%', top: '56%' },
+          { left: '42%', top: '56%' }, // striker
+          { left: '58%', top: '56%' }, // striker
+
+          { left: '50%', top: '72%' }
+      ],
+      '3-4-3': [
+          
+          { left: '50%', top: '11%' },
+
+          { left: '34%', top: '30%' },
+          { left: '50%', top: '30%' },
+          { left: '66%', top: '30%' },
+
+          { left: '26%', top: '50%' },
+          { left: '42%', top: '50%' },
+          { left: '58%', top: '50%' },
+          { left: '74%', top: '50%' },
+
+          { left: '34%', top: '70%' },
+          { left: '50%', top: '70%' },
+          { left: '66%', top: '70%' },
+      ],
+      '4-2-2-2': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '26%' },
+          { left: '42%', top: '26%' },
+          { left: '58%', top: '26%' },
+          { left: '74%', top: '26%' },
+
+          { left: '40%', top: '41%' },
+          { left: '60%', top: '41%' },
+
+          { left: '30%', top: '56%' },
+          { left: '70%', top: '56%' },
+
+          { left: '40%', top: '72%' },
+          { left: '60%', top: '72%' },
+      ],
+      '4-4-1-1': [
+          { left: '50%', top: '11%' },
+
+          { left: '26%', top: '26%' },
+          { left: '42%', top: '26%' },
+          { left: '58%', top: '26%' },
+          { left: '74%', top: '26%' },
+
+          { left: '26%', top: '41%' },
+          { left: '42%', top: '41%' },
+          { left: '58%', top: '41%' },
+          { left: '74%', top: '41%' },
+
+          { left: '50%', top: '56%' },
+
+          { left: '50%', top: '72%' },
+      ],
+      '3-5-2': [
+
+          { left: '50%', top: '11%' },
+
+          { left: '34%', top: '30%' },
+          { left: '50%', top: '30%' },
+          { left: '66%', top: '30%' },
+
+          { left: '22%', top: '58%' },
+          { left: '36%', top: '55%' },
+          { left: '50%', top: '50%' },
+          { left: '64%', top: '55%' },
+          { left: '78%', top: '58%' },
+
+          { left: '43%', top: '72%' },
+          { left: '57%', top: '75%' },
+      ],
+  };
+
+  var formation = '4-4-2'; // starting formation
+
+  // create a listener when child page fully loaded and emit a message to parent
+  window.addEventListener('load', function () {
+    // console.log('I am the child and I am ready to receive messages from parent!')
+    window.parent.postMessage('imListening', '*');
+  })
+
+  // listen for messages from parent
+  window.addEventListener('message', function (event) {
+    // console.log("I am the child and I have received this from parent: " + event.data.message);
+    var encodedQueryString;
+    var queryString;
+    var queryParams;
+    var params = {};
+    if (event.data.message) {
+        // console.log('event:' + event.data.message.substring(1));
+        encodedQueryString = event.data.message.substring(1);
+
+        encodedQueryString = encodedQueryString.substring(2); // remove the 'q='
+        // console.log('strip first:' + encodedQueryString);
+
+        encodedQueryString = encodedQueryString.split("%3D")[0]; // remove everything after '%3D' (facebook)
+        // console.log('strip second:' + encodedQueryString);
+
+        encodedQueryString = encodedQueryString.split("&fbclid=")[0]; // remove everything after '&fbclid=' (facebook)
+        // console.log('strip third:' + encodedQueryString);
+
+        queryString = atob(encodedQueryString); // decode it
+        // console.log('decoded:' + queryString);
+
+        formationParams = queryString.match(/&f=([^&]+)/)[1]; // match everything before the '&f=' parameter
+        // console.log('formation query:' + formationParams);
+
+        var strippedQueryString = queryString.replace(/(&f=[^&]+)?&?(p1=)/, '$2'); // remove the '&f=' parameter and its value, and the subsequent '&'
+        // console.log('stripped query:' + strippedQueryString);
+
+        queryParams = strippedQueryString.split('&');
+        // console.log('queryParams query:' + queryParams);
+
+
+        umami.track('Incoming visit from URL with team data');
+
+        // load players 
+        queryParams.forEach(function(param) {
+            var keyValue = param.split('=');
+            var position = keyValue[0];
+            var playerData = keyValue[1].split(',');
+            params[position] = {
+                name: decodeURIComponent(playerData[0]),
+                country: decodeURIComponent(playerData[1])
+            };
+        });
+
+        // load formation
+        if (positions.hasOwnProperty(formationParams)) {
+            var playerIcons = $('.player-icon');
+            var formationPositions = positions[formationParams];
+            playerIcons.each(function(index) {
+                $(this).animate({
+                    'left': formationPositions[index].left,
+                    'top': formationPositions[index].top
+                });
+            });
+            formation = formationParams;
+        } else {
+            console.log('Formation not found');
+        }
+
+    }
+
+    var queryParams = params;
+    
+    // console.log("2nd: I am the child and I have received this from parent: " + queryParams);
+
+      // If query string contains player data, set the pre-selected players
+      if (Object.keys(queryParams).length > 0) {
+          setPreSelectedPlayers(queryParams);
+
+          // skip first screen, show 'landing page'
+          $("#startscreen").hide();
+          $("#pitchscreen").show();
+          $("#pitch").show();
+          $(".buttons").css('display', 'flex');
+          // modify 'landing page'
+          $('#teamTitle').addClass('hidden');
+          $('#sentTitle').addClass('visible');
+          $('#complete-btn').addClass('hidden');
+          $('#edit-formation-btn').addClass('hidden');
+          $('#tryyourself-btn').removeClass('hidden');
+          $('#tryyourself-btn').addClass('visible');
+          // disable clicks
+          $('#pitch').css('pointer-events', 'none');
+
+          // Check if all players are assigned
+          checkAllPlayersAssigned();
+      }
+  });
+
+
+  // set selected players based on query string data
+  function setPreSelectedPlayers(players) {
+      // console.log('Trying to set players');
+      Object.keys(players).forEach(function(position) {
+          //     console.log(playerId);
+          //     console.log(players[playerId]);
+          // var playerIcon = $('[data-player="unassigned' + players[playerId] + '"]');
+          // if (playerIcon.length > 0) {
+          //     var positionNumber = players[playerId];
+          //     playerIcon.attr('data-icon', positionNumber);
+          //     playerIcon.css('background-image', 'url(img/country_' + positionNumber + '.png)');
+          //     playerIcon.html('<span>' + playerId + '</span>');
+          // }
+          // var countryFlag = $('[data-player="unassigned' + players[playerId] + '"]');
+          // if (playerIcon.length > 0) {
+          //     var positionNumber = players[playerId];
+          //     playerIcon.attr('data-icon', positionNumber);
+          //     playerIcon.css('background-image', 'url(img/country_' + positionNumber + '.png)');
+          //     playerIcon.html('<span>' + playerId + '</span>');
+          // }
+          var playerData = players[position];
+              // console.log(position);
+              var playerIcon = $('[data-player="unassigned' + position.replace(/\D+(\d+)$/, '$1') + '"]');
+          if (playerIcon.length > 0) {
+              var iconUrl = "country_" + playerData.country.toLowerCase() + ".png"; 
+              playerIcon.attr('data-icon', iconUrl);
+              playerIcon.css('background-image', 'url(img/' + iconUrl + ')');
+              playerIcon.html('<span>' + playerData.name + '</span>'); 
+          }
+      });
+  }
+
+
+  function checkAllPlayersAssigned() {
+      var allAssigned = true;
+      $('.player-icon').each(function() {
+          if (!$(this).attr('data-icon')) {
+              allAssigned = false;
+          }
+      });
+
+      if (allAssigned) {
+          $('#complete-btn').removeClass('disabled');
+          $('#complete-btn').addClass('enabled');
+      } else {
+          $('#complete-btn').addClass('disabled');
+          $('#complete-btn').removeClass('enabled');
+      }
+
+      // enable 'Confirm team' button before all players selected
+      // $('#complete-btn').removeClass('disabled');
+      // $('#complete-btn').addClass('enabled');
+
+  }
+
+  function encodeQueryString(queryString) {
+    return btoa(queryString);
+  }
+
+
+
+
+  $(document).ready(function() {
+    
+      var selectedPlayerName; // store the clicked icon name
+
+
+      function setPlayerIconAttributes(playerIcon, selectedIcon, selectedPlayer) {
+          playerIcon.attr('data-icon', selectedIcon);
+          playerIcon.css('background-image', 'url(img/' + selectedIcon + ')');
+          playerIcon.html('<span>' + selectedPlayer + '</span>');
+      }
+
+      // assign images for players
+      $('#player-list > figure > ul > li').each(function() {
+        var positionNumber = $(this).data('icon');
+        if (positionNumber) {
+          $(this).css('background-image', 'url(img/' + positionNumber + ')');
+        }
+      });
+
+      // assign images for formations
+      $('#formation-list > ul > li').each(function() {
+        var positionNumber = $(this).data('formation');
+        if (positionNumber) {
+          $(this).css('background-image', 'url(img/formation-' + positionNumber + '.png)');
+        }
+      });
+      
+      // player icon clicks
+      $(".player-icon").on("click", function() {
+          $.fancybox.open({
+              src  : '#player-list-holder',
+              type : 'inline',
+              opts: {
+                  touch: false
+              },
+              swipe: false, 
+              afterShow: function(instance, current) {
+                  // Override cursor style for elements within Fancybox container
+                  $('.fancybox-container').css('cursor', 'auto');
+              }
+          });
+
+          // store clicked icon's data-player attr
+          selectedPlayerName = $(this).attr('data-player'); 
+
+          // store clicked icon's position attr
+          selectedPosition = $(this).attr('data-playertype'); 
+          // reset players and order
+          $('#player-list figure:nth-child(1), #player-list figure:nth-child(2), #player-list figure:nth-child(3), #player-list figure:nth-child(4)').css('display', 'flex');
+          $('#player-list figure:nth-child(1)').css('order', '1');
+          $('#player-list figure:nth-child(2)').css('order', '2');
+          $('#player-list figure:nth-child(3)').css('order', '3');
+          $('#player-list figure:nth-child(4)').css('order', '4');
+          // re-order lightbox contents based on which position clicked
+          if (selectedPosition == 1) {
+              $('#player-list figure:nth-child(2), #player-list figure:nth-child(3), #player-list figure:nth-child(4)').css('display', 'none');
+          } else if (selectedPosition == 2) {
+              $('#player-list figure:nth-child(1), #player-list figure:nth-child(4)').css('display', 'none');
+          } else if (selectedPosition == 3) {
+              var selectedPositionTemp = $('#player-list figure:nth-child(3)');
+              selectedPositionTemp.css('order', '1');
+              $('#player-list figure:nth-child(1)').css('display', 'none');
+          } else if (selectedPosition == 4) {
+              var selectedPositionTemp = $('#player-list figure:nth-child(4)');
+              selectedPositionTemp.css('order', '1');
+              $('#player-list figure:nth-child(1), #player-list figure:nth-child(2)').css('display', 'none');
+          }
+          
+          // un-disable buttons
+          $('#player-list > figure > ul > li').each(function() {
+              $(this).removeClass('disabled');
+            });
+          // loop through .player-icon that contains a span
+          $('.player-icon').has('span').each(function() {
+            var playerIconName = $(this).find('span').text(); // Find the text inside the span
+            // loop through buttons, disable the matches
+            $('#player-list > figure > ul > li').each(function() {
+              var playerButtonName = $(this).data('player');
+              if (playerIconName == playerButtonName) {
+                $(this).addClass('disabled');
+              }
+            });
+          });
+
+      });
+
+      // fill in the clicked player icon with uniform and name
+      $(document).on('click', '#player-list li', function() {
+        var selectedPlayer = $(this).attr('data-player');
+        var selectedIcon = $(this).attr('data-icon');
+        var playerIcon = $('.player-icon[data-player="' + selectedPlayerName + '"]');
+
+        setPlayerIconAttributes(playerIcon, selectedIcon, selectedPlayer);
+
+        playerIcon.attr('data-player', selectedPlayer); // use this later
+
+        // Check if all players are assigned
+        checkAllPlayersAssigned();
+
+        // close lightbox
+        $.fancybox.close();
+
+      });
+
+      // start button
+      $("#start-btn").click(function() {
+        $("#startscreen").hide();
+        $("#pitchscreen").show();
+        $("#pitch").show();
+        $(".buttons").css('display', 'flex');
+
+        $('#pitch').css('pointer-events', 'auto');
+
+        // Check if all players are assigned
+        checkAllPlayersAssigned();
+
+        umami.track('Start button clicked');
+
+      });
+
+      // formation list lightbox
+      $("#edit-formation-btn").click(function() {
+          $.fancybox.open({
+              src  : '#formation-list',
+              type : 'inline',
+              opts: {
+                  touch: false
+              },
+              swipe: false, 
+              afterShow: function(instance, current) {
+                  // Override cursor style for elements within Fancybox container
+                  $('.fancybox-container').css('cursor', 'auto');
+              }
+          });
+      });
+
+      // select formation list 
+      $(document).on('click', '#formation-list li', function() {
+          formation = $(this).attr('data-formation');
+          // console.log(formation);
+
+
+          var formations = {
+              '4-3-3': { positions: ['1', '2', '3', '4'], counts: [1, 4, 3, 3] },
+              '4-2-3-1': { positions: ['1', '2', '3', '4'], counts: [1, 4, 4, 2] },
+              '4-4-2': { positions: ['1', '2', '3', '4'], counts: [1, 4, 4, 2] },
+              '5-3-2': { positions: ['1', '2', '3', '4'], counts: [1, 5, 3, 2] },
+              '4-1-2-1-2': { positions: ['1', '2', '3', '4'], counts: [1, 4, 3, 3] },
+              '4-5-1': { positions: ['1', '2', '3', '4'], counts: [1, 4, 5, 1] },
+              '4-1-4-1': { positions: ['1', '2', '3', '4'], counts: [1, 4, 3, 3] },
+              '3-4-3': { positions: ['1', '2', '3', '4'], counts: [1, 3, 4, 3] },
+              '4-2-2-2': { positions: ['1', '2', '3', '4'], counts: [1, 4, 4, 2] },
+              '4-4-1-1': { positions: ['1', '2', '3', '4'], counts: [1, 4, 4, 2] },
+              '3-5-2': { positions: ['1', '2', '3', '4'], counts: [1, 3, 5, 2] },
+          };
+
+          function assignPlayerTypes(formation) {
+              if (formations.hasOwnProperty(formation)) {
+                  var positions = formations[formation].positions; // num of positions in the formation
+                  var counts = formations[formation].counts; // number of players in each position
+                  var positionIndex = 0;
+                  var countIndex = 0;
+                  var counter = 0;
+
+                  $('.player-icon').each(function() {
+                      $(this).attr('data-playertype', positions[positionIndex]);
+                      counter++;
+                      // stop when number of players reached
+                      if (counter >= counts[countIndex]) {
+                          counter = 0;
+                          positionIndex = (positionIndex + 1) % positions.length;
+                          countIndex = (countIndex + 1) % counts.length;
+                      }
+                  });
+              } else {
+                  console.log('Formation not found');
+              }
+          }
+
+          assignPlayerTypes(formation);
+
+          // position formation icons 
+          if (positions.hasOwnProperty(formation)) {
+              var playerIcons = $('.player-icon');
+              var formationPositions = positions[formation];
+              playerIcons.each(function(index) {
+                  $(this).animate({
+                      'left': formationPositions[index].left,
+                      'top': formationPositions[index].top
+                  });
+              });
+              // close lightbox
+              $.fancybox.close();
+          } else {
+              console.log('Formation not found');
+          }
+
+      });
+
+
+      // 'complete' button clicked
+      $('#complete-btn').click(function() {
+
+          umami.track('Complete button clicked');
+
+          if (!$(this).hasClass('disabled')) {
+              // console.log('All players are assigned. Action can be performed.');
+              // action 
+          }
+
+          // add frame
+          $('#quizHolder').addClass('framed');
+          $('#pitch').addClass('framed');
+          $('.buttons').addClass('framed');
+          $('#endscreen').css('display', 'flex');
+          $('#teamTitle').addClass('hidden');
+          $('#downloadTitle').addClass('visible');
+
+          $('#pitchscreen').css({
+              backgroundImage: 'url(img/grass.jpg)',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat'
+          });
+
+
+          // hide buttons
+          $('#edit-formation-btn').addClass('hidden');
+          $('#complete-btn').addClass('hidden');
+          $('#download-btn').removeClass('hidden');
+          $('#share-facebook-btn').removeClass('hidden');
+          $('#copy-btn').removeClass('hidden');
+
+          // download
+          $('#download-btn').click(function() {
+              
+              var node = document.getElementById('pitchscreen');
+              var scale = 1.41421356237309504880168872420969807856967187537694; 
+
+              var clonedNode = node.cloneNode(true); // clone the node 
+              clonedNode.style.transform = 'scale(' + scale + ')';
+              clonedNode.style.transformOrigin = 'top left';
+              clonedNode.style.margin = '0';
+              clonedNode.style.width = node.clientWidth * scale + 'px';
+              clonedNode.style.height = node.clientHeight * scale + 'px';
+              clonedNode.style.backgroundImage = 'url(img/grass.jpg)';
+              clonedNode.style.backgroundSize = 'cover';
+
+              // Create the title element
+              var titleNode = document.createElement('h2');
+              titleNode.id = 'downloadTitle';
+              titleNode.className = 'hidden enabled';
+              titleNode.textContent = 'My all-time European Championships starting XI';
+
+              var container = document.createElement('div'); // container for clone
+              container.style.width = node.clientWidth + 'px';
+              container.style.height = node.clientHeigh + 'px';
+              container.style.position = 'absolute';
+              container.style.top = '0';
+              container.style.left = '0';
+              container.style.left = '-10000px';
+              container.style.zIndex = -1000;
+              
+              container.appendChild(titleNode);
+              container.appendChild(clonedNode);
+
+              document.getElementById('oathContainer').appendChild(container);
+
+              domtoimage.toJpeg(clonedNode, {
+                  width: node.clientWidth * 1.41421356237309504880168872420969807856967187537694 * scale,
+                  height: node.clientHeight * 1.41421356237309504880168872420969807856967187537694 * scale
+              })
+              .then(function(dataUrl) {
+                  var downloadLink = document.createElement('a');
+                  downloadLink.href = dataUrl;
+                  downloadLink.download = 'my-all-time-european-championship-team.jpg';
+                  downloadLink.style.display = 'inline'; 
+                  downloadLink.click(); 
+
+                  document.getElementById('oathContainer').removeChild(container);
+              })
+              .catch(function(error) {
+                  console.error('oops, something went wrong!', error);
+              });
+          });
+      });
+
+
+
+      // copy link button
+      $("#copy-btn").click(function() {
+
+          umami.track('Copy Link button clicked');
+
+          document.getElementById("copy-btn").innerHTML = "Link copied!";
+          setTimeout(function() {
+              document.getElementById("copy-btn").innerHTML = "Copy link";
+          }, 1000);
+
+          // build queryString
+          var playerData = {};
+          $('.player-icon').each(function() {
+            var id = $(this).attr('id');
+            var playerName = $(this).find('span').text();
+            var countryIcon = $(this).attr('data-icon');
+            var country = countryIcon.split('_')[1].split('.')[0].toUpperCase();
+
+            if (playerName && country) {
+              playerData[id] = {
+                name: playerName,
+                country: country
+              };
+            }
+          });
+          var queryString = '&f=' + encodeURIComponent(formation);
+          for (var key in playerData) {
+            var player = playerData[key];
+            var position = key.replace(/\D+/g, ''); // extract the numeric part from the id
+            var playerParam = 'p' + position + '=' + encodeURIComponent(player.name) + ',' + encodeURIComponent(player.country);
+            queryString += (queryString ? '&' : '?') + playerParam;
+          }
+          // console.log(queryString);
+          var encodedQueryString = encodeQueryString(queryString);
+          // console.log(encodedQueryString);
+          
+          var currentUrl = document.referrer;
+          console.log('currentURL:' + currentUrl);
+          var browserUrl = (window.location != window.parent.location)
+            ? document.referrer
+            : document.location.href;
+          console.log('browserUrl:' + browserUrl);
+
+
+          const sharedHtmlUrl = 'https://www.lottoland.co.uk/euroquiz/?q=' + encodedQueryString + '#oathSoccer';
+          navigator.clipboard.writeText(sharedHtmlUrl);
+      });
+
+      // register button
+      $("#register-btn").click(function() {
+
+        umami.track('Register button clicked');
+
+        var url = 'https://www.lottoland.co.uk/ob?code=SBK_WELCOME_OFFER_UK&trckA=sm_cms_uk&utm_medium=cms&utm_source=sm_cms_uk&trck5=980a4f7f87f9ae0281c46d9648647e46';
+        window.open(url, '_blank');
+      });
+
+
+      // try yourself button
+      $("#tryyourself-btn").click(function() {
+
+          umami.track('Try It Yourself button clicked');
+
+          // screens
+          $("#startscreen").show();
+          $("#pitchscreen").hide();
+          $("#pitch").hide();
+          // titles
+          $('#teamTitle').removeClass('hidden');
+          $('#sentTitle').removeClass('visible');
+          // buttons
+          $(".buttons").hide();
+          $('#complete-btn').removeClass('hidden');
+          $('#edit-formation-btn').removeClass('hidden');
+          $('#tryyourself-btn').addClass('hidden');
+          $('#tryyourself-btn').removeClass('visible');
+          // reset icons
+          $('#pitch .player-icon').each(function() {
+              $(this).removeAttr("data-icon");
+              $(this).css("background-image", "url(img/player_blank.png)");
+              $(this).find("span").remove();
+          });
+      });
+
+
+      // share buttons 
+      $('#share-facebook-btn').click(function() {
+          umami.track('Facebook share button clicked');
+          
+          //queryString
+          var playerData = {};
+          $('.player-icon').each(function() {
+            var id = $(this).attr('id');
+            var playerName = $(this).find('span').text();
+            var countryIcon = $(this).attr('data-icon');
+            var country = countryIcon.split('_')[1].split('.')[0].toUpperCase();
+
+            if (playerName && country) {
+              playerData[id] = {
+                name: playerName,
+                country: country
+              };
+            }
+          });
+          var queryString = '&f=' + encodeURIComponent(formation);
+          for (var key in playerData) {
+            var player = playerData[key];
+            var position = key.replace(/\D+/g, ''); // extract the numeric part from the id
+            var playerParam = 'p' + position + '=' + encodeURIComponent(player.name) + ',' + encodeURIComponent(player.country);
+            queryString += (queryString ? '&' : '?') + playerParam;
+          }
+          // console.log(queryString);
+          var encodedQueryString = encodeQueryString(queryString);
+          // console.log(encodedQueryString);
+          var urlToShare = 'https://www.lottoland.co.uk/euroquiz/?q=' + encodedQueryString + '%23oathSoccer';
+          var facebookShareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + urlToShare;
+          window.open(facebookShareUrl, '_blank');
+      });
+      $('#share-twitter-btn').click(function() {
+          var url = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent('https://www.lottoland.co.uk/') + '&text=' + encodeURIComponent('Check out this Fancy Dress Generator!');
+          window.open(url, '_blank');
+      });
+      $('#share-whatsapp-btn').click(function() {
+          var url = 'https://api.whatsapp.com/send?text=' + encodeURIComponent('Check out my Euros all-time starting XI! https://www.lottoland.co.uk/');
+          window.open(url, '_blank');
+      });
+
+
+  });
+
+  
+  </script>
+  
+</div>
+
+</body>
+</html>
